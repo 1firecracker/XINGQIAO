@@ -1,0 +1,59 @@
+from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, ForeignKey, func
+from sqlalchemy.orm import relationship
+from app.database import Base
+
+class Scenario(Base):
+    __tablename__ = "scenarios"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    description = Column(Text)
+    icon = Column(String, default="🎯")
+    is_custom = Column(Boolean, default=False)
+    creator_id = Column(Integer, nullable=True)
+
+    # 关联
+    steps = relationship("TrainingStep", back_populates="scenario", cascade="all, delete-orphan")
+
+    created_at = Column(DateTime, default=func.now())
+
+class TrainingStep(Base):
+    __tablename__ = "training_steps"
+
+    id = Column(Integer, primary_key=True, index=True)
+    scenario_id = Column(Integer, ForeignKey("scenarios.id"), nullable=False)
+    step_order = Column(Integer, nullable=False)
+    instruction = Column(Text, nullable=False)
+    image_prompt = Column(Text)
+    image_url = Column(String)
+
+    # 关联
+    scenario = relationship("Scenario", back_populates="steps")
+
+class TrainingRecord(Base):
+    __tablename__ = "training_records"
+
+    id = Column(Integer, primary_key=True, index=True)
+    scenario_id = Column(Integer, ForeignKey("scenarios.id"), nullable=False)
+    user_id = Column(Integer, nullable=True)
+
+    started_at = Column(DateTime, default=func.now())
+    completed_at = Column(DateTime, nullable=True)
+    score = Column(Integer, default=0)
+    total_steps = Column(Integer, default=0)
+    completed_steps = Column(Integer, default=0)
+
+    # 关联
+    scenario = relationship("Scenario")
+
+class GeneratedContent(Base):
+    __tablename__ = "generated_content"
+
+    id = Column(Integer, primary_key=True, index=True)
+    content_type = Column(String, nullable=False)
+    prompt = Column(Text, nullable=False)
+    content_url = Column(String)
+    content_data = Column(Text)
+
+    created_at = Column(DateTime, default=func.now())
+

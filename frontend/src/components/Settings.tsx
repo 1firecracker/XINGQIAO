@@ -36,7 +36,7 @@ const Settings: React.FC<SettingsProps> = ({ preferences, setPreferences }) => {
             type="text" 
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-400 outline-none transition-all"
             placeholder="例如：果果"
           />
         </div>
@@ -50,7 +50,7 @@ const Settings: React.FC<SettingsProps> = ({ preferences, setPreferences }) => {
               <button 
                 key={tag}
                 onClick={() => setInterest(tag)}
-                className={`px-3 py-1 rounded-full text-xs font-medium border ${interest === tag ? 'bg-blue-100 text-blue-600 border-blue-200' : 'bg-white text-slate-400 border-slate-200'}`}
+                className={`px-3 py-1 rounded-full text-xs font-medium border ${interest === tag ? 'bg-green-100 text-green-600 border-green-200' : 'bg-white text-slate-400 border-slate-200'}`}
               >
                 {tag}
               </button>
@@ -60,7 +60,7 @@ const Settings: React.FC<SettingsProps> = ({ preferences, setPreferences }) => {
             type="text" 
             value={interest}
             onChange={(e) => setInterest(e.target.value)}
-            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-400 outline-none transition-all"
             placeholder="例如：蓝色汽车"
           />
         </div>
@@ -73,9 +73,9 @@ const Settings: React.FC<SettingsProps> = ({ preferences, setPreferences }) => {
               <button
                 key={v.id}
                 onClick={() => setVoiceName(v.id)}
-                className={`p-3 rounded-xl border text-left transition-all ${voiceName === v.id ? 'bg-blue-50 border-blue-500 ring-1 ring-blue-500' : 'bg-white border-slate-100'}`}
+                className={`p-3 rounded-xl border text-left transition-all ${voiceName === v.id ? 'bg-stone-50 border-green-400 ring-1 ring-green-400' : 'bg-white border-slate-100'}`}
               >
-                <p className={`text-sm font-bold ${voiceName === v.id ? 'text-blue-600' : 'text-slate-700'}`}>{v.name}</p>
+                <p className={`text-sm font-bold ${voiceName === v.id ? 'text-green-600' : 'text-slate-700'}`}>{v.name}</p>
                 <p className="text-[10px] text-slate-400">{v.description}</p>
               </button>
             ))}
@@ -88,7 +88,7 @@ const Settings: React.FC<SettingsProps> = ({ preferences, setPreferences }) => {
           <select 
             value={bgMusic}
             onChange={(e) => setBgMusic(e.target.value)}
-            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm font-medium"
+            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-400 outline-none transition-all text-sm font-medium"
           >
             {MUSIC_OPTIONS.map(m => (
               <option key={m.id} value={m.id}>{m.name}</option>
@@ -98,15 +98,15 @@ const Settings: React.FC<SettingsProps> = ({ preferences, setPreferences }) => {
 
         <button 
           onClick={handleSave}
-          className="w-full py-4 bg-blue-600 text-white rounded-2xl font-bold shadow-lg active:scale-95 transition-all"
+          className="w-full py-4 bg-green-500 text-white rounded-2xl font-bold shadow-lg active:scale-95 transition-all"
         >
           保存配置
         </button>
       </div>
 
-      <div className="bg-blue-50 p-6 rounded-3xl border border-blue-100">
-        <h3 className="font-bold text-blue-800 mb-2">多感官辅助系统</h3>
-        <p className="text-xs text-blue-600 leading-relaxed">
+      <div className="bg-stone-50 p-6 rounded-3xl border border-stone-200">
+        <h3 className="font-bold text-green-700 mb-2">多感官辅助系统</h3>
+        <p className="text-xs text-green-600 leading-relaxed">
           通过结合 AI 生成的视觉锚点、Gemini 原生 TTS 温柔语音提示、以及宁静的背景音乐，我们为宝贝创造了一个低刺激、高聚焦的沉浸式训练环境。
         </p>
       </div>

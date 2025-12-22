@@ -21,7 +21,7 @@ const Dashboard: React.FC<DashboardProps> = ({ history }) => {
 
   return (
     <div className="space-y-6 pb-6">
-      <div className="bg-gradient-to-br from-blue-600 to-indigo-700 p-6 rounded-3xl text-white shadow-lg">
+      <div className="bg-gradient-to-br from-stone-100 to-stone-200 p-6 rounded-3xl text-slate-800 shadow-lg">
         <h2 className="text-xl font-bold opacity-90">成长印记</h2>
         <div className="grid grid-cols-3 gap-4 mt-6">
           <div className="text-center">
@@ -49,7 +49,7 @@ const Dashboard: React.FC<DashboardProps> = ({ history }) => {
                 <XAxis dataKey="name" hide />
                 <YAxis domain={[0, 100]} hide />
                 <Tooltip />
-                <Line type="monotone" dataKey="score" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4 }} />
+                <Line type="monotone" dataKey="score" stroke="#34d399" strokeWidth={3} dot={{ r: 4 }} />
               </LineChart>
             </ResponsiveContainer>
           ) : (
@@ -67,7 +67,7 @@ const Dashboard: React.FC<DashboardProps> = ({ history }) => {
                 <p className="font-bold text-slate-800">{r.scenarioName}</p>
                 <p className="text-[10px] text-slate-400">{new Date(r.timestamp).toLocaleString()}</p>
               </div>
-              <div className={`font-bold ${r.score === 100 ? 'text-green-500' : 'text-blue-500'}`}>
+              <div className={`font-bold ${r.score === 100 ? 'text-green-500' : 'text-green-500'}`}>
                 {r.score} 分
               </div>
             </div>

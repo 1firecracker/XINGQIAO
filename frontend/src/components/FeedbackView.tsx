@@ -54,7 +54,7 @@ const FeedbackView: React.FC<FeedbackViewProps> = ({ record, onNext, onTryAgain 
         <div className="w-32 h-32 bg-yellow-50 rounded-full flex items-center justify-center text-6xl animate-bounce">
           {isPerfect ? '🌟' : '💪'}
         </div>
-        <div className="absolute -bottom-2 -right-2 bg-blue-600 text-white px-3 py-1 rounded-full font-bold text-xl shadow-lg">
+        <div className="absolute -bottom-2 -right-2 bg-green-500 text-white px-3 py-1 rounded-full font-bold text-xl shadow-lg">
           {record.score}分
         </div>
       </div>
@@ -70,20 +70,20 @@ const FeedbackView: React.FC<FeedbackViewProps> = ({ record, onNext, onTryAgain 
         </p>
       </div>
 
-      <div className="w-full bg-blue-50 p-6 rounded-2xl border border-blue-100 flex items-center gap-4 text-left">
+      <div className="w-full bg-stone-50 p-6 rounded-2xl border border-stone-200 flex items-center gap-4 text-left">
         <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-2xl shadow-sm">
           {nextScenario.icon}
         </div>
         <div>
-          <p className="text-[10px] text-blue-400 font-bold uppercase tracking-wider">进阶推荐</p>
-          <h4 className="font-bold text-blue-800">去试试「{nextScenario.name}」吧</h4>
+          <p className="text-[10px] text-green-500 font-bold uppercase tracking-wider">进阶推荐</p>
+          <h4 className="font-bold text-green-700">去试试「{nextScenario.name}」吧</h4>
         </div>
       </div>
 
       <div className="w-full space-y-3">
         <button 
           onClick={onNext}
-          className="w-full py-4 bg-blue-600 text-white rounded-2xl font-bold text-lg shadow-lg active:scale-95"
+          className="w-full py-4 bg-green-500 text-white rounded-2xl font-bold text-lg shadow-lg active:scale-95"
         >
           回到首页
         </button>
