@@ -64,9 +64,9 @@ const Dashboard: React.FC<DashboardProps> = ({ history }) => {
 
   // 等级分布图表数据
   const levelDistributionData = [
-    { name: '🤝帮你做', level: 'F', value: stats?.fCount || 0, color: '#78716c' },
-    { name: '👀提示做', level: 'P', value: stats?.pCount || 0, color: '#78716c' },
-    { name: '⭐自己做', level: 'I', value: stats?.iCount || 0, color: '#78716c' }
+    { name: '🤝我要帮忙', level: 'F', value: stats?.fCount || 0, color: '#78716c' },
+    { name: '💡提醒我呀', level: 'P', value: stats?.pCount || 0, color: '#78716c' },
+    { name: '⭐我自己来', level: 'I', value: stats?.iCount || 0, color: '#78716c' }
   ];
 
   // 里程碑分布图表数据
@@ -135,15 +135,15 @@ const Dashboard: React.FC<DashboardProps> = ({ history }) => {
         <div className="flex justify-center gap-4 mt-2 text-xs text-stone-600">
           <div className="flex items-center gap-1">
             <div className="w-3 h-3 rounded-full bg-stone-400"></div>
-            <span>🤝帮你做: {stats?.fCount || 0}</span>
+            <span>🤝我要帮忙: {stats?.fCount || 0}</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-3 h-3 rounded-full bg-stone-400"></div>
-            <span>👀提示做: {stats?.pCount || 0}</span>
+            <span>💡提醒我呀: {stats?.pCount || 0}</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-3 h-3 rounded-full bg-stone-400"></div>
-            <span>⭐自己做: {stats?.iCount || 0}</span>
+            <span>⭐我自己来: {stats?.iCount || 0}</span>
           </div>
         </div>
       </div>
@@ -219,7 +219,7 @@ const Dashboard: React.FC<DashboardProps> = ({ history }) => {
                 </div>
                 <div className="flex flex-col items-end gap-1">
                   <div className="px-2 py-1 rounded-lg bg-stone-100 text-stone-700 text-xs font-bold">
-                    {level === 'F' ? '🤝帮你做' : level === 'P' ? '👀提示做' : '⭐自己做'}
+                    {level === 'F' ? '🤝我要帮忙' : level === 'P' ? '💡提醒我呀' : '⭐我自己来'}
                   </div>
                   <div className="text-xs text-slate-500">
                     {r.milestone || 'Level1'}

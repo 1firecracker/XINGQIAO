@@ -36,16 +36,25 @@ const TrainingSession: React.FC<TrainingSessionProps> = ({
   const [showRegenerateDialog, setShowRegenerateDialog] = useState(false);
   const [showAssistanceDialog, setShowAssistanceDialog] = useState(false);
   const [pendingStepIndex, setPendingStepIndex] = useState<number | null>(null);
+  const [imageLoading, setImageLoading] = useState<boolean>(true);
+  const imgRef = useRef<HTMLImageElement | null>(null);
   
   const audioCtxRef = useRef<AudioContext | null>(null);
   const bgMusicRef = useRef<HTMLAudioElement | null>(null);
   const isNewDynamicScenarioRef = useRef<boolean>(false);
   const runningScenarioIdRef = useRef<string | null>(null);
+  const isExecutingRef = useRef<boolean>(false); // 添加执行标记，防止重复执行
 
   useEffect(() => {
     // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/77189bd5-cf28-46a6-93a6-2efc554a2100',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TrainingSession.tsx:useEffect',message:'useEffect triggered',data:{scenarioId:scenario.id,scenarioName:scenario.name,hasSteps:'steps' in scenario,isDynamic:'isDynamic' in scenario,runningScenarioId:runningScenarioIdRef.current},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    fetch('http://127.0.0.1:7243/ingest/77189bd5-cf28-46a6-93a6-2efc554a2100',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TrainingSession.tsx:useEffect',message:'useEffect triggered',data:{scenarioId:scenario.id,scenarioName:scenario.name,hasSteps:'steps' in scenario,isDynamic:'isDynamic' in scenario,runningScenarioId:runningScenarioIdRef.current,isExecuting:isExecutingRef.current},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
     // #endregion
+    
+    // 防止重复执行：如果已经在执行中，直接返回
+    if (isExecutingRef.current) {
+      console.log('TrainingSession: Already executing, skipping duplicate call');
+      return;
+    }
     
     // 清除之前的运行标记（允许重新执行同一个场景）
     if (runningScenarioIdRef.current === scenario.id) {
@@ -58,24 +67,29 @@ const TrainingSession: React.FC<TrainingSessionProps> = ({
     // 标记当前scenario正在执行
     const currentScenarioId = scenario.id;
     runningScenarioIdRef.current = currentScenarioId;
+    isExecutingRef.current = true; // 设置执行标记
     audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
     
     // 异步执行
     const executeFlow = async () => {
-      // 检查scenario.id是否变化（防止在异步执行期间scenario变化）
-      if (scenario.id !== currentScenarioId) {
-        // #region agent log
-        fetch('http://127.0.0.1:7243/ingest/77189bd5-cf28-46a6-93a6-2efc554a2100',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TrainingSession.tsx:useEffect',message:'Scenario changed during execution, aborting',data:{originalId:currentScenarioId,newId:scenario.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-        // #endregion
+      try {
+        // 检查scenario.id是否变化（防止在异步执行期间scenario变化）
+        if (scenario.id !== currentScenarioId) {
+          // #region agent log
+          fetch('http://127.0.0.1:7243/ingest/77189bd5-cf28-46a6-93a6-2efc554a2100',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TrainingSession.tsx:useEffect',message:'Scenario changed during execution, aborting',data:{originalId:currentScenarioId,newId:scenario.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+          // #endregion
+          if (runningScenarioIdRef.current === currentScenarioId) {
+            runningScenarioIdRef.current = null;
+          }
+          return;
+        }
+        await startSessionFlow();
+      } finally {
+        // 执行完成后，清除执行标记
         if (runningScenarioIdRef.current === currentScenarioId) {
           runningScenarioIdRef.current = null;
         }
-        return;
-      }
-      await startSessionFlow();
-      // 执行完成后，如果scenario.id没变，清除标记
-      if (runningScenarioIdRef.current === currentScenarioId) {
-        runningScenarioIdRef.current = null;
+        isExecutingRef.current = false;
       }
     };
     
@@ -83,16 +97,44 @@ const TrainingSession: React.FC<TrainingSessionProps> = ({
     
     return () => {
       // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/77189bd5-cf28-46a6-93a6-2efc554a2100',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TrainingSession.tsx:useEffect_cleanup',message:'useEffect cleanup',data:{scenarioId:scenario.id,currentScenarioId,runningScenarioId:runningScenarioIdRef.current},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7243/ingest/77189bd5-cf28-46a6-93a6-2efc554a2100',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TrainingSession.tsx:useEffect_cleanup',message:'useEffect cleanup',data:{scenarioId:scenario.id,currentScenarioId,runningScenarioId:runningScenarioIdRef.current,isExecuting:isExecutingRef.current},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
       // #endregion
       // 只在scenario.id变化时才清除标记（React严格模式的cleanup不应该清除）
       if (runningScenarioIdRef.current === currentScenarioId && scenario.id !== currentScenarioId) {
         runningScenarioIdRef.current = null;
+        isExecutingRef.current = false;
       }
       if (bgMusicRef.current) bgMusicRef.current.pause();
       if (audioCtxRef.current) audioCtxRef.current.close();
     };
   }, [scenario.id]);
+
+  useEffect(() => {
+    const step = steps[currentStepIndex];
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/77189bd5-cf28-46a6-93a6-2efc554a2100',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TrainingSession.tsx:useEffect_currentStepIndex',message:'currentStepIndex changed',data:{currentStepIndex,hasImageUrl:!!step?.imageUrl,imageUrl:step?.imageUrl,imageLoading},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+    // #endregion
+    if (step?.imageUrl) {
+      setImageLoading(true);
+    } else {
+      setImageLoading(false);
+    }
+  }, [currentStepIndex, steps]);
+
+  const handleImageRef = (img: HTMLImageElement | null) => {
+    imgRef.current = img;
+    if (img && currentStep?.imageUrl) {
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/77189bd5-cf28-46a6-93a6-2efc554a2100',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TrainingSession.tsx:handleImageRef',message:'Image ref callback',data:{currentStepIndex,imageUrl:currentStep.imageUrl,imgComplete:img.complete,imgNaturalWidth:img.naturalWidth,imgSrc:img.src,imageLoading},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
+      if (img.complete && img.naturalWidth > 0) {
+        // #region agent log
+        fetch('http://127.0.0.1:7243/ingest/77189bd5-cf28-46a6-93a6-2efc554a2100',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TrainingSession.tsx:handleImageRef',message:'Image already loaded (cached), setting loading to false',data:{currentStepIndex,imageUrl:currentStep.imageUrl,imgComplete:img.complete,imgNaturalWidth:img.naturalWidth},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+        // #endregion
+        setImageLoading(false);
+      }
+    }
+  };
 
   const startSessionFlow = async () => {
     // #region agent log
@@ -469,8 +511,14 @@ const TrainingSession: React.FC<TrainingSessionProps> = ({
   };
 
   const handleNext = () => {
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/77189bd5-cf28-46a6-93a6-2efc554a2100',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TrainingSession.tsx:handleNext_entry',message:'handleNext called',data:{currentStepIndex,currentStepCompleted:currentStep.completed,currentImageUrl:currentStep.imageUrl,stepsLength:steps.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
     // 检查当前步骤是否已完成
     if (!currentStep.completed) {
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/77189bd5-cf28-46a6-93a6-2efc554a2100',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TrainingSession.tsx:handleNext',message:'Step not completed, showing dialog',data:{currentStepIndex},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
       // 如果未完成，先弹出辅助等级选择
       handleStepComplete();
       return;
@@ -478,9 +526,17 @@ const TrainingSession: React.FC<TrainingSessionProps> = ({
 
     if (currentStepIndex < steps.length - 1) {
       const nextIdx = currentStepIndex + 1;
+      const nextStep = steps[nextIdx];
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/77189bd5-cf28-46a6-93a6-2efc554a2100',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TrainingSession.tsx:handleNext',message:'Switching to next step',data:{currentStepIndex,nextIdx,currentImageUrl:currentStep.imageUrl,nextImageUrl:nextStep.imageUrl,currentImageUrlExists:!!currentStep.imageUrl,nextImageUrlExists:!!nextStep.imageUrl,imageLoading},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
+      setImageLoading(true);
       setCurrentStepIndex(nextIdx);
       playStepVoice(steps[nextIdx].text);
     } else {
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/77189bd5-cf28-46a6-93a6-2efc554a2100',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TrainingSession.tsx:handleNext',message:'Training finished',data:{currentStepIndex,stepsLength:steps.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
       // 收集所有步骤的辅助等级
       const stepLevels = steps.map(s => s.assistanceLevel || 'F') as AssistanceLevel[];
       onFinish(stepLevels, steps.length);
@@ -583,31 +639,54 @@ const TrainingSession: React.FC<TrainingSessionProps> = ({
               const imgUrl = currentStep.imageUrl;
               const isRelative = imgUrl?.startsWith('/');
               const isAbsolute = imgUrl?.startsWith('http');
-              fetch('http://127.0.0.1:7243/ingest/77189bd5-cf28-46a6-93a6-2efc554a2100',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TrainingSession.tsx:img_src',message:'Rendering image',data:{imageUrl:imgUrl,isRelative,isAbsolute,currentOrigin:window.location.origin,fullUrl:isRelative ? window.location.origin + imgUrl : imgUrl},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+              fetch('http://127.0.0.1:7243/ingest/77189bd5-cf28-46a6-93a6-2efc554a2100',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TrainingSession.tsx:img_render',message:'Rendering image element',data:{currentStepIndex,imageUrl:imgUrl,isRelative,isAbsolute,currentOrigin:window.location.origin,fullUrl:isRelative ? window.location.origin + imgUrl : imgUrl},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
               return null;
             })()}
             {/* #endregion */}
+            {imageLoading && (
+              <div className="absolute inset-0 w-full h-full bg-slate-50 flex items-center justify-center z-10 transition-opacity">
+                <div className="w-8 h-8 border-4 border-stone-200 border-t-green-400 rounded-full animate-spin"></div>
+              </div>
+            )}
             <img 
+              ref={handleImageRef}
+              key={currentStepIndex}
               src={currentStep.imageUrl} 
-              className="w-full h-full object-contain animate-in zoom-in-95 duration-500" 
+              className={`w-full h-full object-contain animate-in zoom-in-95 duration-500 transition-opacity ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
               alt="Step"
               onError={(e) => {
                 // #region agent log
-                fetch('http://127.0.0.1:7243/ingest/77189bd5-cf28-46a6-93a6-2efc554a2100',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TrainingSession.tsx:img_onError',message:'Image load failed',data:{imageUrl:currentStep.imageUrl,src:(e.target as HTMLImageElement).src},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+                fetch('http://127.0.0.1:7243/ingest/77189bd5-cf28-46a6-93a6-2efc554a2100',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TrainingSession.tsx:img_onError',message:'Image load failed',data:{currentStepIndex,imageUrl:currentStep.imageUrl,src:(e.target as HTMLImageElement).src,attemptedUrl:(e.target as HTMLImageElement).src,imageLoading},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
                 // #endregion
+                setImageLoading(false);
                 console.error('Image load failed:', currentStep.imageUrl);
               }}
-              onLoad={() => {
+              onLoadStart={() => {
                 // #region agent log
-                fetch('http://127.0.0.1:7243/ingest/77189bd5-cf28-46a6-93a6-2efc554a2100',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TrainingSession.tsx:img_onLoad',message:'Image loaded successfully',data:{imageUrl:currentStep.imageUrl},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+                fetch('http://127.0.0.1:7243/ingest/77189bd5-cf28-46a6-93a6-2efc554a2100',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TrainingSession.tsx:img_onLoadStart',message:'Image load started',data:{currentStepIndex,imageUrl:currentStep.imageUrl,imageLoading},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
                 // #endregion
+                setImageLoading(true);
+              }}
+              onLoad={(e) => {
+                // #region agent log
+                fetch('http://127.0.0.1:7243/ingest/77189bd5-cf28-46a6-93a6-2efc554a2100',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TrainingSession.tsx:img_onLoad',message:'Image loaded successfully',data:{currentStepIndex,imageUrl:currentStep.imageUrl,loadTime:Date.now(),imageLoadingBefore:imageLoading,imgComplete:(e.target as HTMLImageElement).complete},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+                // #endregion
+                setImageLoading(false);
               }}
             />
           </>
         ) : (
-          <div className="w-full h-full bg-slate-50 flex items-center justify-center">
-            <div className="w-8 h-8 border-4 border-stone-200 border-t-green-400 rounded-full animate-spin"></div>
-          </div>
+          <>
+            {/* #region agent log */}
+            {(() => {
+              fetch('http://127.0.0.1:7243/ingest/77189bd5-cf28-46a6-93a6-2efc554a2100',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TrainingSession.tsx:img_noUrl',message:'No imageUrl, showing loading spinner',data:{currentStepIndex,hasImageUrl:!!currentStep.imageUrl},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+              return null;
+            })()}
+            {/* #endregion */}
+            <div className="w-full h-full bg-slate-50 flex items-center justify-center">
+              <div className="w-8 h-8 border-4 border-stone-200 border-t-green-400 rounded-full animate-spin"></div>
+            </div>
+          </>
         )}
       </div>
 
@@ -626,7 +705,7 @@ const TrainingSession: React.FC<TrainingSessionProps> = ({
           <h4 className="text-xl font-bold text-slate-800 leading-tight">{currentStep.text}</h4>
           {currentStep.completed && currentStep.assistanceLevel && (
             <p className="text-xs text-stone-600 mt-1">
-              {currentStep.assistanceLevel === 'F' ? '🤝帮你做' : currentStep.assistanceLevel === 'P' ? '👀提示做' : '⭐自己做'}
+              {currentStep.assistanceLevel === 'F' ? '🤝我要帮忙' : currentStep.assistanceLevel === 'P' ? '💡提醒我呀' : '⭐我自己来'}
             </p>
           )}
         </div>

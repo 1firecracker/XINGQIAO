@@ -32,7 +32,7 @@ export const SCENARIOS: Scenario[] = [
     icon: "✋",
     description: "学习在课堂上正确举手",
     steps: [
-      { id: 1, text: "举单手（不超肩）", img_prompt_suffix: "a child raising one hand up to shoulder height, simple classroom background, clear gesture" },
+      { id: 1, text: "举单手", img_prompt_suffix: "a child raising one hand up to shoulder height, simple classroom background, clear gesture" },
       { id: 2, text: "等老师叫", img_prompt_suffix: "a child with hand raised waiting patiently, teacher figure in background, calm expression" },
       { id: 3, text: "轻轻放手", img_prompt_suffix: "a child gently lowering hand, smooth motion, peaceful classroom atmosphere" }
     ],
@@ -44,7 +44,7 @@ export const SCENARIOS: Scenario[] = [
     icon: "🤝",
     description: "学习礼貌地向他人借东西",
     steps: [
-      { id: 1, text: "轻拍对方手臂", img_prompt_suffix: "a child gently tapping another child's arm, friendly gesture, simple illustration" },
+      { id: 1, text: "轻拍手臂", img_prompt_suffix: "a child gently tapping another child's arm, friendly gesture, simple illustration" },
       { id: 2, text: "说'借一下'", img_prompt_suffix: "a child saying '借一下' with polite gesture, speech bubble, friendly interaction" },
       { id: 3, text: "用完归还", img_prompt_suffix: "a child returning an item to another child, both hands visible, grateful expression" }
     ],
@@ -56,7 +56,7 @@ export const SCENARIOS: Scenario[] = [
     icon: "🧸",
     description: "学习整理和收拾玩具",
     steps: [
-      { id: 1, text: "拿起1个玩具", img_prompt_suffix: "a child picking up one toy from the floor, focused action, simple room background" },
+      { id: 1, text: "拿起玩具", img_prompt_suffix: "a child picking up one toy from the floor, focused action, simple room background" },
       { id: 2, text: "放进收纳盒", img_prompt_suffix: "a child placing a toy into a storage box, organized action, clear container" },
       { id: 3, text: "盖盒盖", img_prompt_suffix: "a child closing the lid of a storage box, completing the task, satisfied expression" }
     ],
@@ -64,8 +64,8 @@ export const SCENARIOS: Scenario[] = [
   }
 ];
 
-export const PROMPT_BASE_STYLE = "flat vector illustration, minimalist, thick clean black outlines, high contrast, pure white background, low saturation colors, pastel blue and green palette, no clutter, no shadows, no gradients, educational visual support style";
-export const PROMPT_VISUAL_ANCHOR = "one main subject centered, occupying 70% of frame, visual anchor point focused, clear and distinct shapes, symbolic representation";
+export const PROMPT_BASE_STYLE = "minimalist black line art, white background, low saturation colors only if needed, no shading, no gradients, no textures, no clutter";
+export const PROMPT_VISUAL_ANCHOR = "one child or objects only, one action, neutral expression, simple shapes, no decorative elements, no background people, no text, no symbols";
 
 export const VOICE_OPTIONS = [
   { id: 'Kore', name: '温柔大姐姐', description: '亲切且富有耐心' },

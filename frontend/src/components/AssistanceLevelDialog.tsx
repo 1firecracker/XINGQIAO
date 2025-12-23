@@ -30,7 +30,7 @@ const AssistanceLevelDialog: React.FC<AssistanceLevelDialogProps> = ({
           >
             <div className="flex items-center gap-3">
               <span className="text-3xl">🤝</span>
-              <span className="font-bold text-stone-700 text-lg">帮你做</span>
+              <span className="font-bold text-stone-700 text-lg">我要帮忙</span>
             </div>
           </button>
 
@@ -39,8 +39,8 @@ const AssistanceLevelDialog: React.FC<AssistanceLevelDialogProps> = ({
             className="w-full p-4 bg-stone-100 border-2 border-stone-300 rounded-2xl text-left active:scale-95 transition-transform"
           >
             <div className="flex items-center gap-3">
-              <span className="text-3xl">👀</span>
-              <span className="font-bold text-stone-700 text-lg">提示做</span>
+              <span className="text-3xl">💡</span>
+              <span className="font-bold text-stone-700 text-lg">提醒我呀</span>
             </div>
           </button>
 
@@ -50,7 +50,7 @@ const AssistanceLevelDialog: React.FC<AssistanceLevelDialogProps> = ({
           >
             <div className="flex items-center gap-3">
               <span className="text-3xl">⭐</span>
-              <span className="font-bold text-stone-700 text-lg">自己做</span>
+              <span className="font-bold text-stone-700 text-lg">我自己来</span>
             </div>
           </button>
         </div>

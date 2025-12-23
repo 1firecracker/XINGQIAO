@@ -23,32 +23,25 @@
 
 #### 本地运行
 
-1. **克隆项目**
-   ```bash
-   git clone <repository-url>
-   cd XINGQIAO
-   ```
+1. **配置环境变量**
 
-2. **安装依赖**
-   ```bash
-   npm install
-   ```
-
-3. **配置环境变量**
-
-   创建 `.env.local` 文件并设置API密钥：
+   设置 `GEMINI_API_KEY` 环境变量，或创建 `env-example.txt` 文件：
    ```env
    GEMINI_API_KEY=your_gemini_api_key_here
    ```
 
-4. **启动开发服务器**
-   ```bash
-   npm run dev
+2. **一键启动**
+
+   运行启动脚本：
+   ```powershell
+   .\start.ps1
    ```
 
-5. **访问应用**
+3. **访问应用**
 
-   在浏览器中打开 [http://localhost:5173](http://localhost:5173)
+   - 前端: [http://localhost:3000](http://localhost:3000)
+   - 后端API: [http://localhost:8000](http://localhost:8000)
+   - API文档: [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ### 🏗️ 系统架构
 
@@ -98,30 +91,14 @@ XINGQIAO/
 - 进度追踪图表
 
 #### 用户设置
-- 儿童姓名设置
 - 兴趣偏好配置
 - 语音音色选择
 - 背景音乐设置
 
-### 🤝 贡献指南
-
-欢迎提交Issue和Pull Request来改进这个项目！
-
-1. Fork 本仓库
-2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 创建 Pull Request
-
-### 📄 许可证
-
-本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情
 
 ### 📞 联系我们
 
-- 项目主页: [GitHub Repository]
-- 问题反馈: [GitHub Issues]
-- 邮箱: your-email@example.com
+- 邮箱: 15526792626@163.com
 
 ---
 
@@ -131,7 +108,6 @@ XINGQIAO/
 
 - Python 3.11+
 - Node.js 18+
-- Docker & Docker Compose (可选)
 
 ### 本地开发
 
@@ -158,29 +134,11 @@ npm install
 npm run dev
 ```
 
-### Docker部署
 
-```bash
-# 复制环境变量文件
-cp env-example.txt .env
-# 编辑.env文件设置GEMINI_API_KEY
-
-# 一键启动
-docker-compose up --build
 
 # 访问应用
 # 前端: http://localhost:3000
 # API文档: http://localhost:8000/docs
 ```
 
-## 📋 实施计划
 
-项目已按照[实施计划文档](./docs/实施计划.md)完成前后端分离重构，包括：
-
-- ✅ Phase 1: 基础搭建 - FastAPI后端 + React前端架构
-- ✅ Phase 2: 核心功能 - 数据模型、API接口、AI服务集成
-- ✅ Phase 3: 集成测试 - 单元测试和集成测试
-- ✅ Phase 4: 文件存储 - 文件管理和缓存策略
-- ✅ Phase 5: 部署演示 - Docker容器化部署
-
-详细实施步骤请参考 [实施计划文档](./docs/实施计划.md)。

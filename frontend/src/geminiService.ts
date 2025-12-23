@@ -56,7 +56,7 @@ export async function generateSpecialEdImage(
     ? `A small child with ${preferences.interest}`
     : `A small child with a simple light-colored t-shirt`;
 
-  const fullPrompt = `${childDescriptor}, ${promptSuffix}, ${PROMPT_BASE_STYLE}, ${PROMPT_VISUAL_ANCHOR}, single subject, clear focus, high contrast, clean white background.`;
+  const fullPrompt = `${promptSuffix}, ${PROMPT_BASE_STYLE}, ${PROMPT_VISUAL_ANCHOR}`;
 
   try {
     const response = await aiApi.generateImage(fullPrompt, stepId, scenarioId);
