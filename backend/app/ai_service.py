@@ -194,7 +194,16 @@ image_prompt示例（主题：过马路）：
                                     if not image_base64.startswith('data:'):
                                         image_base64 = f"data:image/png;base64,{image_base64}"
                                     
-                                    print(f"[图片生成] 成功生成图片 (Base64, 长度: {len(image_base64)} 字符)")
+                                    # 验证 Base64 数据完整性（检查长度和格式）
+                                    base64_part = image_base64.split(',')[1] if ',' in image_base64 else image_base64
+                                    expected_length = (len(base64_part) // 4) * 3  # Base64 编码后长度约为原数据的 4/3
+                                    print(f"[图片生成] 成功生成图片 (Base64, 总长度: {len(image_base64)} 字符, Base64部分: {len(base64_part)} 字符)")
+                                    
+                                    # 验证 Base64 字符串格式（只包含有效字符）
+                                    import re
+                                    if not re.match(r'^[A-Za-z0-9+/=]+$', base64_part):
+                                        print(f"[图片生成] 警告: Base64 数据可能包含无效字符")
+                                    
                                     return image_base64
             except Exception as img_error:
                 print(f"Image model generation failed: {img_error}")
