@@ -12,11 +12,11 @@ class Settings:
     debug: bool = os.getenv("DEBUG", "True").lower() == "true"
     secret_key: str = os.getenv("SECRET_KEY", "hackathon-secret-key")
 
-    # CORS配置
-    allowed_origins: List[str] = os.getenv(
-        "ALLOWED_ORIGINS",
-        "http://localhost:3000,http://127.0.0.1:3000"
-    ).split(",")
+    # CORS配置（Railway部署时允许所有来源）
+    _allowed_origins = os.getenv("ALLOWED_ORIGINS", "")
+    allowed_origins: List[str] = ["*"] if _allowed_origins == "*" else (
+        _allowed_origins.split(",") if _allowed_origins else ["http://localhost:3000", "http://127.0.0.1:3000"]
+    )
 
 settings = Settings()
 

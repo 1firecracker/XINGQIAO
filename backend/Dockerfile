@@ -20,9 +20,9 @@ RUN useradd --create-home --shell /bin/bash app \
     && chown -R app:app /app
 USER app
 
-# 暴露端口
+# 暴露端口（Railway会动态分配，这里只是声明）
 EXPOSE 8000
 
-# 启动命令
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# 启动命令（支持动态端口）
+CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
 
