@@ -70,6 +70,11 @@ export async function generateSpecialEdImage(
     if (response && response.success && response.data && response.data.image_url) {
       let imageUrl = response.data.image_url;
       
+      // 如果是 Base64 data URL，直接返回（不转换）
+      if (imageUrl.startsWith('data:')) {
+        return imageUrl;
+      }
+      
       // 如果是相对路径，转换为完整的后端URL
       if (imageUrl.startsWith('/')) {
         const apiBaseUrl = import.meta.env.VITE_API_URL || import.meta.env.REACT_APP_API_URL || '';
