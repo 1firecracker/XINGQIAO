@@ -68,7 +68,21 @@ export async function generateSpecialEdImage(
     // #endregion
     // aiApi返回的是API响应对象 {success, data, message}
     if (response && response.success && response.data && response.data.image_url) {
-      const imageUrl = response.data.image_url;
+      let imageUrl = response.data.image_url;
+      
+      // 如果是相对路径，转换为完整的后端URL
+      if (imageUrl.startsWith('/')) {
+        const apiBaseUrl = import.meta.env.VITE_API_URL || import.meta.env.REACT_APP_API_URL || '';
+        if (apiBaseUrl) {
+          // 移除末尾的斜杠（如果有）
+          const baseUrl = apiBaseUrl.replace(/\/$/, '');
+          imageUrl = `${baseUrl}${imageUrl}`;
+        } else {
+          // 如果没有配置API URL，使用当前域名（开发环境）
+          imageUrl = `${window.location.origin}${imageUrl}`;
+        }
+      }
+      
       // #region agent log
       fetch('http://127.0.0.1:7243/ingest/77189bd5-cf28-46a6-93a6-2efc554a2100',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'geminiService.ts:generateSpecialEdImage',message:'Returning image URL',data:{imageUrl,isRelative:imageUrl.startsWith('/'),isAbsolute:imageUrl.startsWith('http'),currentOrigin:window.location.origin},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
       // #endregion

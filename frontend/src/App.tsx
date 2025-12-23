@@ -161,6 +161,21 @@ const App: React.FC = () => {
     localStorage.setItem('star-bridge-custom-scenarios', JSON.stringify(newCustomList));
   };
 
+  // 将相对路径转换为完整的后端URL
+  const normalizeImageUrl = (url: string | null | undefined): string | undefined => {
+    if (!url) return undefined;
+    if (url.startsWith('http')) return url; // 已经是完整URL
+    if (url.startsWith('/')) {
+      const apiBaseUrl = import.meta.env.VITE_API_URL || import.meta.env.REACT_APP_API_URL || '';
+      if (apiBaseUrl) {
+        const baseUrl = apiBaseUrl.replace(/\/$/, '');
+        return `${baseUrl}${url}`;
+      }
+      return `${window.location.origin}${url}`;
+    }
+    return url;
+  };
+
   // 合并后端场景和自定义场景
   const allScenarios = [
     ...backendScenarios.map(s => ({
@@ -172,7 +187,7 @@ const App: React.FC = () => {
         id: step.id,
         text: step.instruction,
         img_prompt_suffix: step.image_prompt || '',
-        imageUrl: step.image_url
+        imageUrl: normalizeImageUrl(step.image_url)
       }))
     })),
     ...customScenarios
