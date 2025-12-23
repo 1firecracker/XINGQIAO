@@ -54,3 +54,5 @@ frontend/public/uploads/
 .coverage
 .pytest_cache/
 htmlcov/
+
+.cursor/

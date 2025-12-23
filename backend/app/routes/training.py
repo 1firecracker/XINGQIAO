@@ -40,9 +40,17 @@ async def finish_training(training_id: int, data: dict, db: Session = Depends(ge
         raise HTTPException(status_code=404, detail="Training record not found")
     
     record.completed_at = datetime.now()
-    record.score = data.get("score", 0)
+    record.score = data.get("score", 0)  # 保留用于向后兼容
     record.total_steps = data.get("total_steps", 0)
     record.completed_steps = data.get("completed_steps", 0)
+    
+    # 新增VB-MAPP辅助等级字段
+    if "step_levels" in data:
+        record.step_levels = data.get("step_levels")
+    if "overall_level" in data:
+        record.overall_level = data.get("overall_level")
+    if "milestone" in data:
+        record.milestone = data.get("milestone")
     
     db.commit()
     db.refresh(record)

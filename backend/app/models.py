@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, ForeignKey, func
+from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, ForeignKey, func, JSON
 from sqlalchemy.orm import relationship
 from app.database import Base
 
@@ -26,6 +26,7 @@ class TrainingStep(Base):
     instruction = Column(Text, nullable=False)
     image_prompt = Column(Text)
     image_url = Column(String)
+    assistance_level = Column(String, nullable=True)  # 'F', 'P', or 'I'
 
     # 关联
     scenario = relationship("Scenario", back_populates="steps")
@@ -39,9 +40,12 @@ class TrainingRecord(Base):
 
     started_at = Column(DateTime, default=func.now())
     completed_at = Column(DateTime, nullable=True)
-    score = Column(Integer, default=0)
+    score = Column(Integer, default=0)  # 保留用于向后兼容
     total_steps = Column(Integer, default=0)
     completed_steps = Column(Integer, default=0)
+    step_levels = Column(JSON, nullable=True)  # 存储每个步骤的辅助等级数组 ['F', 'P', 'I', ...]
+    overall_level = Column(String, nullable=True)  # 'F', 'P', or 'I'
+    milestone = Column(String, nullable=True)  # 'Level1' or 'Level2'
 
     # 关联
     scenario = relationship("Scenario")

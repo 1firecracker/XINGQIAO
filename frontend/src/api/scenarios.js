@@ -8,5 +8,7 @@ export const scenariosApi = {
   delete: (id) => apiClient.delete(`/api/scenarios/${id}`),
   updateStepImage: (scenarioId, stepId, imageUrl) =>
     apiClient.patch(`/api/scenarios/${scenarioId}/steps/${stepId}/image`, { image_url: imageUrl }),
+  deleteSteps: (scenarioId) => apiClient.delete(`/api/scenarios/${scenarioId}/steps`),
+  updateSteps: (scenarioId, steps) => apiClient.put(`/api/scenarios/${scenarioId}/steps`, steps),
 };
 

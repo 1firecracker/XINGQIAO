@@ -1,15 +1,16 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Scenario, UserPreferences, TrainingStep } from '../types';
+import { Scenario, UserPreferences, TrainingStep, AssistanceLevel } from '../types';
 import { planScenarioSteps, generateSpecialEdImage, generateTTSAudio, decodeAudioBuffer } from '../geminiService';
 import { MUSIC_OPTIONS, SFX } from '../constants';
 import RegenerateImageDialog from './RegenerateImageDialog';
+import AssistanceLevelDialog from './AssistanceLevelDialog';
 import { scenariosApi } from '../api/scenarios';
 
 interface TrainingSessionProps {
   scenario: Scenario | { id: string; name: string; isDynamic: boolean; icon?: string };
   preferences: UserPreferences;
-  onFinish: (completedCount: number, total: number) => void;
+  onFinish: (stepLevels: AssistanceLevel[], total: number) => void;
   onCancel: () => void;
   onScenarioPlanned?: (scenario: Scenario) => void;
 }
@@ -33,6 +34,8 @@ const TrainingSession: React.FC<TrainingSessionProps> = ({
   const [totalImages, setTotalImages] = useState(0);
   const [currentAudioSource, setCurrentAudioSource] = useState<AudioBufferSourceNode | null>(null);
   const [showRegenerateDialog, setShowRegenerateDialog] = useState(false);
+  const [showAssistanceDialog, setShowAssistanceDialog] = useState(false);
+  const [pendingStepIndex, setPendingStepIndex] = useState<number | null>(null);
   
   const audioCtxRef = useRef<AudioContext | null>(null);
   const bgMusicRef = useRef<HTMLAudioElement | null>(null);
@@ -343,53 +346,87 @@ const TrainingSession: React.FC<TrainingSessionProps> = ({
 
   const handleRegenerate = async () => {
     // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/77189bd5-cf28-46a6-93a6-2efc554a2100',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TrainingSession.tsx:handleRegenerate',message:'handleRegenerate called',data:{stepsCount:steps.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+    fetch('http://127.0.0.1:7243/ingest/77189bd5-cf28-46a6-93a6-2efc554a2100',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TrainingSession.tsx:handleRegenerate',message:'handleRegenerate called - will replan and regenerate',data:{scenarioId:scenario.id,scenarioName:scenario.name},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
     // #endregion
     setShowRegenerateDialog(false);
-    // 重新生成所有图片
-    const totalImagesCount = steps.length;
-    setMode('GENERATING');
-    setGenerationProgress(0);
+    setMode('PLANNING');
     
     const scenarioId = parseInt(scenario.id);
     const numericScenarioId = isNaN(scenarioId) ? undefined : scenarioId;
     
-    const genPromises = steps.map(async (step, idx) => {
+    // 如果是后端场景，先删除数据库中的旧步骤
+    if (numericScenarioId) {
       // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/77189bd5-cf28-46a6-93a6-2efc554a2100',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TrainingSession.tsx:handleRegenerate',message:'Regenerating image',data:{stepId:step.id,stepIndex:idx},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7243/ingest/77189bd5-cf28-46a6-93a6-2efc554a2100',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TrainingSession.tsx:handleRegenerate',message:'Deleting old steps from database',data:{scenarioId:numericScenarioId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
       // #endregion
-      const stepId = step.id;
+      try {
+        await scenariosApi.deleteSteps(numericScenarioId);
+      } catch (error) {
+        console.error('Failed to delete old steps:', error);
+      }
+    }
+    
+    // 1. 重新规划步骤（重新生成提示词）
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/77189bd5-cf28-46a6-93a6-2efc554a2100',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TrainingSession.tsx:handleRegenerate',message:'Replanning scenario',data:{topic:scenario.name},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+    // #endregion
+    const result = await planScenarioSteps(scenario.name, preferences);
+    const plannedSteps = result.steps;
+    const totalImagesCount = result.totalImages;
+    
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/77189bd5-cf28-46a6-93a6-2efc554a2100',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TrainingSession.tsx:handleRegenerate',message:'Replanning completed',data:{stepsCount:plannedSteps.length,totalImages:totalImagesCount},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+    // #endregion
+    
+    // 2. 重新生成所有图片
+    setMode('GENERATING');
+    setGenerationProgress(0);
+    
+    const genPromises = plannedSteps.map(async (step, idx) => {
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/77189bd5-cf28-46a6-93a6-2efc554a2100',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TrainingSession.tsx:handleRegenerate',message:'Regenerating image with new prompt',data:{stepIndex:idx,promptSuffix:step.img_prompt_suffix.substring(0,50)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+      // #endregion
       const url = await generateSpecialEdImage(
         step.img_prompt_suffix, 
         preferences,
-        stepId,
+        undefined, // 不传stepId，因为是新生成的步骤
         numericScenarioId
       );
       setGenerationProgress(prev => prev + (100 / totalImagesCount));
       
-      // 如果生成成功且有stepId和scenarioId，保存到数据库
-      if (url && stepId && numericScenarioId) {
-        try {
-          await scenariosApi.updateStepImage(numericScenarioId, stepId, url);
-        } catch (error) {
-          console.error('Failed to save image URL to database:', error);
-        }
-      }
-      
-      return { idx, stepId, url };
+      return { idx, url, step };
     });
 
     const results = await Promise.all(genPromises);
-    const finalizedSteps = steps.map((s, i) => ({
+    const finalizedSteps = plannedSteps.map((s, i) => ({
       ...s,
-      imageUrl: results.find(r => r.idx === i || r.stepId === s.id)?.url
+      imageUrl: results.find(r => r.idx === i)?.url
     }));
 
+    // 3. 如果是后端场景，保存新的步骤和图片到数据库
+    if (numericScenarioId) {
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/77189bd5-cf28-46a6-93a6-2efc554a2100',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TrainingSession.tsx:handleRegenerate',message:'Saving new steps to database',data:{scenarioId:numericScenarioId,stepsCount:finalizedSteps.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+      // #endregion
+      try {
+        const stepsToSave = finalizedSteps.map((step, idx) => ({
+          step_order: idx + 1,
+          instruction: step.text,
+          image_prompt: step.img_prompt_suffix,
+          image_url: step.imageUrl || null
+        }));
+        await scenariosApi.updateSteps(numericScenarioId, stepsToSave);
+      } catch (error) {
+        console.error('Failed to save new steps to database:', error);
+      }
+    }
+
     setSteps(finalizedSteps);
+    setTotalImages(totalImagesCount);
     setMode('ACTIVE');
     if (runningScenarioIdRef.current === scenario.id) {
-          runningScenarioIdRef.current = null;
-        };
+      runningScenarioIdRef.current = null;
+    }
     playStepVoice(finalizedSteps[0].text);
   };
 
@@ -407,13 +444,46 @@ const TrainingSession: React.FC<TrainingSessionProps> = ({
     } catch (e) {}
   };
 
+  const handleStepComplete = () => {
+    // 如果步骤已经完成，直接取消完成
+    if (currentStep.completed) {
+      setSteps(prev => prev.map((s, i) => 
+        i === currentStepIndex ? {...s, completed: false, assistanceLevel: undefined} : s
+      ));
+      return;
+    }
+    
+    // 弹出辅助等级选择对话框
+    setPendingStepIndex(currentStepIndex);
+    setShowAssistanceDialog(true);
+  };
+
+  const handleAssistanceLevelSelect = (level: AssistanceLevel) => {
+    if (pendingStepIndex !== null) {
+      setSteps(prev => prev.map((s, i) => 
+        i === pendingStepIndex ? {...s, completed: true, assistanceLevel: level} : s
+      ));
+      setPendingStepIndex(null);
+    }
+    setShowAssistanceDialog(false);
+  };
+
   const handleNext = () => {
+    // 检查当前步骤是否已完成
+    if (!currentStep.completed) {
+      // 如果未完成，先弹出辅助等级选择
+      handleStepComplete();
+      return;
+    }
+
     if (currentStepIndex < steps.length - 1) {
       const nextIdx = currentStepIndex + 1;
       setCurrentStepIndex(nextIdx);
       playStepVoice(steps[nextIdx].text);
     } else {
-      onFinish(steps.filter(s => s.completed).length, steps.length);
+      // 收集所有步骤的辅助等级
+      const stepLevels = steps.map(s => s.assistanceLevel || 'F') as AssistanceLevel[];
+      onFinish(stepLevels, steps.length);
     }
   };
 
@@ -483,6 +553,15 @@ const TrainingSession: React.FC<TrainingSessionProps> = ({
         onRegenerate={handleRegenerate}
         cachedCount={cachedCount}
       />
+      <AssistanceLevelDialog
+        isOpen={showAssistanceDialog}
+        onSelect={handleAssistanceLevelSelect}
+        onClose={() => {
+          setShowAssistanceDialog(false);
+          setPendingStepIndex(null);
+        }}
+        stepText={currentStep?.text}
+      />
     <div className="flex flex-col h-full space-y-6 animate-in fade-in duration-500">
       <div className="flex items-center justify-between">
         <button onClick={onCancel} className="text-slate-400 hover:text-slate-600 transition-colors">
@@ -534,7 +613,7 @@ const TrainingSession: React.FC<TrainingSessionProps> = ({
 
       <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 flex items-center gap-5">
         <button 
-          onClick={() => setSteps(prev => prev.map((s, i) => i === currentStepIndex ? {...s, completed: !s.completed} : s))}
+          onClick={handleStepComplete}
           className={`w-14 h-14 rounded-2xl border-2 flex items-center justify-center transition-all shrink-0 ${currentStep.completed ? 'bg-green-500 border-green-500 text-white shadow-lg shadow-green-100' : 'border-slate-200 bg-slate-50 active:scale-95'}`}
         >
           {currentStep.completed ? (
@@ -543,7 +622,14 @@ const TrainingSession: React.FC<TrainingSessionProps> = ({
             <div className="w-3 h-3 bg-slate-200 rounded-full"></div>
           )}
         </button>
-        <h4 className="text-xl font-bold text-slate-800 leading-tight flex-1">{currentStep.text}</h4>
+        <div className="flex-1">
+          <h4 className="text-xl font-bold text-slate-800 leading-tight">{currentStep.text}</h4>
+          {currentStep.completed && currentStep.assistanceLevel && (
+            <p className="text-xs text-stone-600 mt-1">
+              {currentStep.assistanceLevel === 'F' ? '🤝帮你做' : currentStep.assistanceLevel === 'P' ? '👀提示做' : '⭐自己做'}
+            </p>
+          )}
+        </div>
       </div>
 
       <button onClick={handleNext} className="w-full py-5 bg-green-500 text-white rounded-[2rem] font-bold text-lg shadow-xl shadow-green-200 active:scale-[0.98] transition-all hover:bg-green-600">

@@ -44,3 +44,33 @@ def create_training_record(db: Session, record: schemas.TrainingRecordCreate):
 def get_training_records(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.TrainingRecord).offset(skip).limit(limit).all()
 
+def delete_scenario_steps(db: Session, scenario_id: int):
+    """删除场景的所有步骤"""
+    steps = db.query(models.TrainingStep).filter(
+        models.TrainingStep.scenario_id == scenario_id
+    ).all()
+    for step in steps:
+        db.delete(step)
+    db.commit()
+    return len(steps)
+
+def update_scenario_steps(db: Session, scenario_id: int, steps: List[schemas.TrainingStepCreate]):
+    """更新场景的步骤（先删除旧步骤，再添加新步骤）"""
+    # 删除旧步骤
+    delete_scenario_steps(db, scenario_id)
+    
+    # 添加新步骤
+    for step_data in steps:
+        db_step = models.TrainingStep(
+            scenario_id=scenario_id,
+            step_order=step_data.step_order,
+            instruction=step_data.instruction,
+            image_prompt=step_data.image_prompt,
+            image_url=step_data.image_url
+        )
+        db.add(db_step)
+    
+    db.commit()
+    db.refresh(db.query(models.Scenario).filter(models.Scenario.id == scenario_id).first())
+    return db.query(models.TrainingStep).filter(models.TrainingStep.scenario_id == scenario_id).all()
+

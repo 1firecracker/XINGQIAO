@@ -8,59 +8,59 @@ export const SCENARIOS: Scenario[] = [
     icon: "🛒",
     description: "学习在超市结账时遵守排队规则",
     steps: [
-      { id: 1, text: "站在黄线后面", img_prompt_suffix: "a child standing quietly behind a clear thick yellow line on the floor, back view, clear spatial markers" },
-      { id: 2, text: "保持安全距离", img_prompt_suffix: "two children waiting in line with a 2-meter gap between them, simple floor footprints markings" },
-      { id: 3, text: "把物品放在柜台", img_prompt_suffix: "a single hand placing a milk carton on a clean white checkout counter, high contrast" }
+      { id: 1, text: "站黄线后", img_prompt_suffix: "a child standing quietly behind a clear thick yellow line on the floor, back view, clear spatial markers" },
+      { id: 2, text: "等前人走", img_prompt_suffix: "two children waiting in line, the front child moving away, simple floor footprints markings" },
+      { id: 3, text: "拿物品", img_prompt_suffix: "a single hand placing a milk carton on a clean white checkout counter, high contrast" }
     ],
-    next_recommendation: "crossing_road"
+    next_recommendation: "classroom_greeting"
   },
   {
-    id: "brushing_teeth",
-    name: "洗漱刷牙",
-    icon: "🪥",
-    description: "每日晨间清洁习惯培养",
+    id: "classroom_greeting",
+    name: "课堂打招呼",
+    icon: "👋",
+    description: "学习在课堂上主动打招呼",
     steps: [
-      { id: 1, text: "挤牙膏", img_prompt_suffix: "a hand squeezing a pea-sized amount of blue toothpaste onto a toothbrush, close up" },
-      { id: 2, text: "刷刷牙", img_prompt_suffix: "a child with a happy expression brushing teeth, simplified bathroom mirror background" },
-      { id: 3, text: "漱口杯洗嘴巴", img_prompt_suffix: "a child holding a simple light blue plastic cup to their mouth" }
+      { id: 1, text: "眼神轻对视", img_prompt_suffix: "a child making gentle eye contact with a teacher, simple classroom background, friendly expression" },
+      { id: 2, text: "嘴角微微笑", img_prompt_suffix: "a child with a gentle smile, warm and friendly facial expression, simple illustration" },
+      { id: 3, text: "说'你好'", img_prompt_suffix: "a child saying hello with hand gesture, speech bubble with '你好', simple classroom setting" }
     ],
-    next_recommendation: "garbage_sorting"
+    next_recommendation: "classroom_hand_raise"
   },
   {
-    id: "crossing_road",
-    name: "过马路",
-    icon: "🚦",
-    description: "交通安全与信号灯识别",
+    id: "classroom_hand_raise",
+    name: "课堂举手",
+    icon: "✋",
+    description: "学习在课堂上正确举手",
     steps: [
-      { id: 1, text: "红灯停", img_prompt_suffix: "a large bright red traffic light symbol, high contrast, stop gesture" },
-      { id: 2, text: "绿灯行", img_prompt_suffix: "a large bright green traffic light symbol, walking person figure" },
-      { id: 3, text: "走斑马线", img_prompt_suffix: "a child walking straight across thick white zebra crossing lines, blue sky" }
+      { id: 1, text: "举单手（不超肩）", img_prompt_suffix: "a child raising one hand up to shoulder height, simple classroom background, clear gesture" },
+      { id: 2, text: "等老师叫", img_prompt_suffix: "a child with hand raised waiting patiently, teacher figure in background, calm expression" },
+      { id: 3, text: "轻轻放手", img_prompt_suffix: "a child gently lowering hand, smooth motion, peaceful classroom atmosphere" }
     ],
-    next_recommendation: "bus_riding"
+    next_recommendation: "borrow_item"
   },
   {
-    id: "garbage_sorting",
-    name: "垃圾分类",
-    icon: "♻️",
-    description: "认识垃圾桶与分类投放",
+    id: "borrow_item",
+    name: "借东西",
+    icon: "🤝",
+    description: "学习礼貌地向他人借东西",
     steps: [
-      { id: 1, text: "认识蓝色垃圾桶", img_prompt_suffix: "a large bright blue recycling bin, centered, white recycling logo" },
-      { id: 2, text: "纸箱压扁", img_prompt_suffix: "a flattened clean cardboard box on a white surface, clear edges" },
-      { id: 3, text: "投入纸张", img_prompt_suffix: "a hand dropping a white paper into the blue bin opening" }
+      { id: 1, text: "轻拍对方手臂", img_prompt_suffix: "a child gently tapping another child's arm, friendly gesture, simple illustration" },
+      { id: 2, text: "说'借一下'", img_prompt_suffix: "a child saying '借一下' with polite gesture, speech bubble, friendly interaction" },
+      { id: 3, text: "用完归还", img_prompt_suffix: "a child returning an item to another child, both hands visible, grateful expression" }
+    ],
+    next_recommendation: "tidy_toys"
+  },
+  {
+    id: "tidy_toys",
+    name: "收拾玩具",
+    icon: "🧸",
+    description: "学习整理和收拾玩具",
+    steps: [
+      { id: 1, text: "拿起1个玩具", img_prompt_suffix: "a child picking up one toy from the floor, focused action, simple room background" },
+      { id: 2, text: "放进收纳盒", img_prompt_suffix: "a child placing a toy into a storage box, organized action, clear container" },
+      { id: 3, text: "盖盒盖", img_prompt_suffix: "a child closing the lid of a storage box, completing the task, satisfied expression" }
     ],
     next_recommendation: "supermarket_queue"
-  },
-  {
-    id: "bus_riding",
-    name: "乘坐公交",
-    icon: "🚌",
-    description: "公共交通礼仪与安全",
-    steps: [
-      { id: 1, text: "刷卡上车", img_prompt_suffix: "a hand holding a yellow card to a simple black card reader machine" },
-      { id: 2, text: "扶好扶手", img_prompt_suffix: "a hand firmly holding a vertical yellow bus handle, focused view" },
-      { id: 3, text: "到站下车", img_prompt_suffix: "a bus door wide open, view of a safe grey sidewalk" }
-    ],
-    next_recommendation: "brush_teeth"
   }
 ];
 

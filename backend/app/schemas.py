@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Literal
 from datetime import datetime
 
 # 训练步骤
@@ -15,6 +15,7 @@ class TrainingStepCreate(TrainingStepBase):
 class TrainingStep(TrainingStepBase):
     id: int
     scenario_id: int
+    assistance_level: Optional[Literal['F', 'P', 'I']] = None
 
     class Config:
         from_attributes = True
@@ -41,9 +42,12 @@ class Scenario(ScenarioBase):
 # 训练记录
 class TrainingRecordBase(BaseModel):
     scenario_id: int
-    score: int = 0
+    score: int = 0  # 保留用于向后兼容
     total_steps: int = 0
     completed_steps: int = 0
+    step_levels: Optional[List[Literal['F', 'P', 'I']]] = None
+    overall_level: Optional[Literal['F', 'P', 'I']] = None
+    milestone: Optional[Literal['Level1', 'Level2']] = None
 
 class TrainingRecordCreate(TrainingRecordBase):
     pass

@@ -1,10 +1,14 @@
 
+export type AssistanceLevel = 'F' | 'P' | 'I';
+export type Milestone = 'Level1' | 'Level2';
+
 export interface TrainingStep {
   id: number;
   text: string;
   img_prompt_suffix: string;
   completed?: boolean;
   imageUrl?: string;
+  assistanceLevel?: AssistanceLevel;
 }
 
 export interface Scenario {
@@ -20,9 +24,12 @@ export interface TrainingRecord {
   timestamp: number;
   scenarioId: string;
   scenarioName: string;
-  score: number;
+  score?: number; // 保留用于向后兼容
   totalSteps: number;
   completedSteps: number;
+  stepLevels: AssistanceLevel[]; // 每个步骤的辅助等级
+  overallLevel: AssistanceLevel; // 场景总体辅助等级
+  milestone: Milestone; // 能力里程碑
 }
 
 export interface UserPreferences {

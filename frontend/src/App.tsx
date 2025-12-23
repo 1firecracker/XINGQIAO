@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { AppState, Scenario, TrainingRecord, UserPreferences } from './types';
+import { AppState, Scenario, TrainingRecord, UserPreferences, AssistanceLevel } from './types';
 import { useScenarios } from './hooks/useScenarios';
 import { useTraining } from './hooks/useTraining';
+import { calculateOverallLevel, calculateMilestone } from './vbmappConfig';
 import Header from './components/Header';
 import ScenarioCard from './components/ScenarioCard';
 import TrainingSession from './components/TrainingSession';
@@ -47,20 +48,40 @@ const App: React.FC = () => {
     try {
       const trainingHistory = await getTrainingHistory();
       // 转换后端格式到前端格式
-      const formattedHistory = trainingHistory.map((record: any) => ({
-        timestamp: new Date(record.started_at).getTime(),
-        scenarioId: record.scenario_id.toString(),
-        scenarioName: record.scenario?.name || '未知场景',
-        score: record.score,
-        totalSteps: record.total_steps,
-        completedSteps: record.completed_steps
-      }));
+      const formattedHistory = trainingHistory.map((record: any) => {
+        // 处理向后兼容：如果新字段不存在，设置默认值
+        const stepLevels = record.step_levels || (record.completed_steps > 0 ? Array(record.completed_steps).fill('F') : []);
+        const overallLevel = record.overall_level || (stepLevels.length > 0 ? calculateOverallLevel(stepLevels) : 'F');
+        const milestone = record.milestone || calculateMilestone(overallLevel);
+        
+        return {
+          timestamp: new Date(record.started_at).getTime(),
+          scenarioId: record.scenario_id.toString(),
+          scenarioName: record.scenario?.name || '未知场景',
+          score: record.score, // 保留用于向后兼容
+          totalSteps: record.total_steps,
+          completedSteps: record.completed_steps,
+          stepLevels: stepLevels as AssistanceLevel[],
+          overallLevel: overallLevel as AssistanceLevel,
+          milestone: milestone as 'Level1' | 'Level2'
+        };
+      });
       setHistory(formattedHistory);
     } catch (error) {
       console.error('Failed to load history:', error);
       // 回退到localStorage
       const savedHistory = localStorage.getItem('star-bridge-history');
-      if (savedHistory) setHistory(JSON.parse(savedHistory));
+      if (savedHistory) {
+        const parsed = JSON.parse(savedHistory);
+        // 处理向后兼容：为旧数据添加默认值
+        const compatibleHistory = parsed.map((record: any) => ({
+          ...record,
+          stepLevels: record.stepLevels || (record.completedSteps > 0 ? Array(record.completedSteps).fill('F') : []),
+          overallLevel: record.overallLevel || (record.completedSteps > 0 ? 'F' : 'F'),
+          milestone: record.milestone || 'Level1'
+        }));
+        setHistory(compatibleHistory);
+      }
     }
   };
 
@@ -106,15 +127,25 @@ const App: React.FC = () => {
     localStorage.setItem('star-bridge-custom-scenarios', JSON.stringify(newCustomList));
   };
 
-  const handleFinishTraining = async (completedCount: number, total: number) => {
+  const handleFinishTraining = async (stepLevels: AssistanceLevel[], total: number) => {
+    // 计算场景总体辅助等级和里程碑
+    const overallLevel = calculateOverallLevel(stepLevels);
+    const milestone = calculateMilestone(overallLevel);
+    const completedCount = stepLevels.length;
+    
+    // 保留score字段用于向后兼容（基于完成步骤数计算）
     const score = Math.round((completedCount / total) * 100);
+    
     const record: TrainingRecord = {
       timestamp: Date.now(),
       scenarioId: selectedScenario.id,
       scenarioName: selectedScenario.name,
-      score,
+      score, // 保留用于向后兼容
       totalSteps: total,
-      completedSteps: completedCount
+      completedSteps: completedCount,
+      stepLevels,
+      overallLevel,
+      milestone
     };
     const newHistory = [record, ...history].slice(0, 50);
     setHistory(newHistory);
