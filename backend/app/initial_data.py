@@ -2,16 +2,11 @@ from app.database import SessionLocal
 from app.models import Scenario, TrainingStep
 
 def create_initial_data():
-    """创建初始演示数据"""
+    """创建或更新初始演示数据"""
     db = SessionLocal()
 
     try:
-        # 检查是否已有数据
-        if db.query(Scenario).count() > 0:
-            print("初始数据已存在，跳过创建")
-            return
-
-        # 创建预设场景
+        # 预设场景数据
         scenarios_data = [
             {
                 "name": "超市排队",
@@ -83,19 +78,43 @@ def create_initial_data():
 
         for scenario_data in scenarios_data:
             steps_data = scenario_data.pop("steps")
-            scenario = Scenario(**scenario_data, is_custom=False)
-
-            for step_data in steps_data:
-                step = TrainingStep(**step_data)
-                scenario.steps.append(step)
-
-            db.add(scenario)
+            scenario_name = scenario_data["name"]
+            
+            # 检查场景是否已存在
+            existing_scenario = db.query(Scenario).filter(Scenario.name == scenario_name, Scenario.is_custom == False).first()
+            
+            if existing_scenario:
+                # 更新现有场景
+                print(f"更新场景: {scenario_name}")
+                existing_scenario.description = scenario_data.get("description", existing_scenario.description)
+                existing_scenario.icon = scenario_data.get("icon", existing_scenario.icon)
+                
+                # 删除旧的步骤
+                for old_step in existing_scenario.steps:
+                    db.delete(old_step)
+                
+                # 添加新步骤
+                for step_data in steps_data:
+                    step = TrainingStep(**step_data)
+                    existing_scenario.steps.append(step)
+            else:
+                # 创建新场景
+                print(f"创建场景: {scenario_name}")
+                scenario = Scenario(**scenario_data, is_custom=False)
+                
+                for step_data in steps_data:
+                    step = TrainingStep(**step_data)
+                    scenario.steps.append(step)
+                
+                db.add(scenario)
 
         db.commit()
-        print("初始数据创建完成")
+        print("初始数据创建/更新完成")
 
     except Exception as e:
-        print(f"创建初始数据失败: {e}")
+        print(f"创建/更新初始数据失败: {e}")
+        import traceback
+        traceback.print_exc()
         db.rollback()
     finally:
         db.close()
