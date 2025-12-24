@@ -56,3 +56,4 @@ frontend/public/uploads/
 htmlcov/
 
 .cursor/
+env-example.txt
