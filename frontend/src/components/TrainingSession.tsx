@@ -711,7 +711,7 @@ const TrainingSession: React.FC<TrainingSessionProps> = ({
         </div>
       </div>
 
-      <button onClick={handleNext} className="w-full py-5 bg-[#D0E8D0] text-white rounded-[2rem] font-bold text-lg shadow-xl shadow-[#D0E8D0]/30 active:scale-[0.98] transition-all hover:bg-[#E0F8E0]">
+      <button onClick={handleNext} className="w-full py-5 bg-green-500 text-white rounded-[2rem] font-bold text-lg shadow-xl shadow-green-200 active:scale-[0.98] transition-all hover:bg-green-600">
         {currentStepIndex < steps.length - 1 ? '我做好了，下一步' : '训练圆满结束'}
       </button>
     </div>

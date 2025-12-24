@@ -54,15 +54,6 @@ const AssistanceLevelDialog: React.FC<AssistanceLevelDialogProps> = ({
             </div>
           </button>
         </div>
-
-        {onClose && (
-          <button
-            onClick={onClose}
-            className="w-full py-3 bg-stone-100 text-stone-600 rounded-2xl font-bold text-sm active:scale-95 transition-transform"
-          >
-            取消
-          </button>
-        )}
       </div>
     </div>
   );

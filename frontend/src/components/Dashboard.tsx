@@ -71,7 +71,7 @@ const Dashboard: React.FC<DashboardProps> = ({ history }) => {
 
   // 里程碑分布图表数据
   const milestoneDistributionData = [
-    { name: 'Level1', value: stats?.level1Count || 0, color: '#3b82f6' },
+    { name: 'Level1', value: stats?.level1Count || 0, color: '#cfcfcf' },
     { name: 'Level2', value: stats?.level2Count || 0, color: '#8b5cf6' }
   ];
 

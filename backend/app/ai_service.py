@@ -19,11 +19,20 @@ class AIService:
 
     async def plan_scenario_steps(self, topic: str, preferences: dict = None) -> Dict[str, Any]:
         """AI规划场景步骤"""
+        # 提取个性化信息
+        child_name = preferences.get('childName', '宝贝') if preferences else '宝贝'
+        interest = preferences.get('interest', '') if preferences else ''
+        
+        # 构建个性化上下文
+        personalization_context = f"儿童昵称：{child_name}"
+        if interest:
+            personalization_context += f"\n兴趣偏好：{interest}（请在生成场景时自然地融入这个元素，例如在场景中的某个物品上增添相关印花(不是每张图片都需要插入, 合适时机即可)）"
+        
         prompt = f"""
 你是一位资深的特殊教育专家，为孤独症儿童设计社交故事。
 
 主题：{topic}
-儿童偏好：{preferences or {}}
+{personalization_context}
 
 请设计3-5个循序渐进的训练步骤，每个步骤包含：
 1. 清晰简洁的指令（中文，必须是6字以内的短指令，符合自闭症儿童的认知特点）

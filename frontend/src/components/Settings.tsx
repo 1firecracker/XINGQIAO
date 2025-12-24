@@ -98,7 +98,7 @@ const Settings: React.FC<SettingsProps> = ({ preferences, setPreferences }) => {
 
         <button 
           onClick={handleSave}
-          className="w-full py-4 bg-[#D0E8D0] text-white rounded-2xl font-bold shadow-xl shadow-[#D0E8D0]/30 active:scale-95 transition-all hover:bg-[#E0F8E0]"
+          className="w-full py-4 bg-[rgba(74,222,128,1)] text-white rounded-2xl font-bold shadow-lg active:scale-95 transition-all"
         >
           保存配置
         </button>

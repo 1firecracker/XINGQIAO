@@ -42,18 +42,18 @@ def create_initial_data():
                 "steps": [
                     {
                         "step_order": 1,
-                        "instruction": "红灯停",
-                        "image_prompt": "a large bright red traffic light symbol, high contrast, stop gesture"
+                        "instruction": "转头观察",
+                        "image_prompt": "child turning head left and right to check for cars at crosswalk"
                     },
                     {
                         "step_order": 2,
-                        "instruction": "绿灯行",
-                        "image_prompt": "a large bright green traffic light symbol, walking person figure"
+                        "instruction": "耐心等待绿灯",
+                        "image_prompt": "child patiently waiting for green pedestrian light at crosswalk"
                     },
                     {
                         "step_order": 3,
-                        "instruction": "走斑马线",
-                        "image_prompt": "a child walking straight across thick white zebra crossing lines, blue sky"
+                        "instruction": "直行通过",
+                        "image_prompt": "child walking straight on crosswalk"
                     }
                 ]
             },
