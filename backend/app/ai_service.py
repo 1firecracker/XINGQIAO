@@ -173,6 +173,23 @@ image_prompt示例（主题：过马路）：
                                     # 获取图像数据（可能是bytes或base64字符串）
                                     image_data = part.inline_data.data
                                     
+                                    # 处理 Gemini API 返回的数据格式
+                                    # Gemini 可能返回 Base64 编码的字符串（作为 bytes 或 str）
+                                    if isinstance(image_data, bytes):
+                                        # 检查是否是 Base64 编码的字符串（只包含 ASCII 可打印字符）
+                                        try:
+                                            # 尝试解码为字符串
+                                            data_str = image_data.decode('utf-8')
+                                            # 检查是否是 Base64 格式（只包含 Base64 字符）
+                                            import re
+                                            if re.match(r'^[A-Za-z0-9+/=\s]+$', data_str):
+                                                # 是 Base64 字符串，需要解码
+                                                print(f"[图片生成] 检测到 Base64 编码的 bytes，转换为字符串后解码")
+                                                image_data = data_str
+                                        except UnicodeDecodeError:
+                                            # 不是 UTF-8 字符串，可能是真正的二进制数据
+                                            pass
+                                    
                                     # 验证图片数据
                                     if isinstance(image_data, bytes):
                                         data_size = len(image_data)
@@ -185,7 +202,7 @@ image_prompt示例（主题：过马路）：
                                         data_size = len(image_data)
                                         print(f"[图片生成] 图片数据验证: Base64字符串长度={data_size}")
                                     
-                                    # 保存图像文件
+                                    # 保存图像文件（file_manager 会正确处理 Base64 字符串）
                                     relative_path = file_manager.save_image(image_data)
                                     
                                     # 验证文件是否真的保存成功
