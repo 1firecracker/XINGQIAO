@@ -173,8 +173,28 @@ image_prompt示例（主题：过马路）：
                                     # 获取图像数据（可能是bytes或base64字符串）
                                     image_data = part.inline_data.data
                                     
+                                    # 验证图片数据
+                                    if isinstance(image_data, bytes):
+                                        data_size = len(image_data)
+                                        # 检查 PNG 文件头（PNG 文件以 89 50 4E 47 开头）
+                                        is_valid_png = data_size > 8 and image_data[:8] == b'\x89PNG\r\n\x1a\n'
+                                        print(f"[图片生成] 图片数据验证: 大小={data_size} bytes, 有效PNG={is_valid_png}")
+                                        if not is_valid_png and data_size > 0:
+                                            print(f"[图片生成] 警告: 图片数据可能不是有效的PNG格式，前8字节: {image_data[:8]}")
+                                    elif isinstance(image_data, str):
+                                        data_size = len(image_data)
+                                        print(f"[图片生成] 图片数据验证: Base64字符串长度={data_size}")
+                                    
                                     # 保存图像文件
                                     relative_path = file_manager.save_image(image_data)
+                                    
+                                    # 验证文件是否真的保存成功
+                                    import os
+                                    from pathlib import Path
+                                    full_path = file_manager.upload_dir / relative_path
+                                    file_exists = full_path.exists()
+                                    file_size = full_path.stat().st_size if file_exists else 0
+                                    print(f"[图片生成] 文件保存验证: 路径={full_path}, 存在={file_exists}, 大小={file_size} bytes")
                                     
                                     # 返回文件URL
                                     image_url = file_manager.get_file_url(relative_path)

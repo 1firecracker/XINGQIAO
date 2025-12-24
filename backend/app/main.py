@@ -45,6 +45,7 @@ app.include_router(training.router, prefix="/api/training", tags=["training"])
 app.include_router(ai.router, prefix="/api/ai", tags=["ai"])
 
 # 挂载静态文件目录
+# 注意：StaticFiles 会自动应用 CORS 中间件（如果已配置）
 app.mount("/files", StaticFiles(directory=str(file_manager.upload_dir)), name="files")
 
 @app.get("/health")
