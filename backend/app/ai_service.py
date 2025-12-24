@@ -160,7 +160,7 @@ image_prompt示例（主题：过马路）：
                     raise Exception("API client not initialized")
                 # 使用gemini-2.5-flash-image模型生成图像
                 response = self.client.models.generate_content(
-                    model="gemini-2.5-flash-image",
+                    model="gemini-3-pro-image-preview",
                     contents=prompt
                 )
                 
