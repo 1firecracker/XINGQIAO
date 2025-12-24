@@ -173,38 +173,13 @@ image_prompt示例（主题：过马路）：
                                     # 获取图像数据（可能是bytes或base64字符串）
                                     image_data = part.inline_data.data
                                     
-                                    # 临时方案：直接返回 Base64 data URL，避免文件系统问题
-                                    if isinstance(image_data, bytes):
-                                        # 如果是 bytes，转换为 base64
-                                        image_base64 = base64.b64encode(image_data).decode('utf-8')
-                                    elif isinstance(image_data, str):
-                                        # 如果已经是字符串，检查是否包含 data URL 前缀
-                                        if ',' in image_data:
-                                            # 已经是 data URL 格式
-                                            image_base64 = image_data
-                                        else:
-                                            # 是纯 base64 字符串
-                                            image_base64 = f"data:image/png;base64,{image_data}"
-                                    else:
-                                        # 尝试转换为 bytes 再编码
-                                        image_bytes = bytes(image_data)
-                                        image_base64 = base64.b64encode(image_bytes).decode('utf-8')
+                                    # 保存图像文件
+                                    relative_path = file_manager.save_image(image_data)
                                     
-                                    # 确保是完整的 data URL 格式
-                                    if not image_base64.startswith('data:'):
-                                        image_base64 = f"data:image/png;base64,{image_base64}"
-                                    
-                                    # 验证 Base64 数据完整性（检查长度和格式）
-                                    base64_part = image_base64.split(',')[1] if ',' in image_base64 else image_base64
-                                    expected_length = (len(base64_part) // 4) * 3  # Base64 编码后长度约为原数据的 4/3
-                                    print(f"[图片生成] 成功生成图片 (Base64, 总长度: {len(image_base64)} 字符, Base64部分: {len(base64_part)} 字符)")
-                                    
-                                    # 验证 Base64 字符串格式（只包含有效字符）
-                                    import re
-                                    if not re.match(r'^[A-Za-z0-9+/=]+$', base64_part):
-                                        print(f"[图片生成] 警告: Base64 数据可能包含无效字符")
-                                    
-                                    return image_base64
+                                    # 返回文件URL
+                                    image_url = file_manager.get_file_url(relative_path)
+                                    print(f"[图片生成] 成功生成图片: {image_url}")
+                                    return image_url
             except Exception as img_error:
                 print(f"Image model generation failed: {img_error}")
                 # 如果图像生成失败，使用fallback

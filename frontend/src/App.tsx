@@ -164,11 +164,7 @@ const App: React.FC = () => {
   // 将相对路径转换为完整的后端URL
   const normalizeImageUrl = (url: string | null | undefined): string | undefined => {
     if (!url) return undefined;
-    // Base64 data URL 直接返回，不转换
-    if (url.startsWith('data:')) return url;
-    // 已经是完整URL
-    if (url.startsWith('http')) return url;
-    // 相对路径转换为完整URL
+    if (url.startsWith('http')) return url; // 已经是完整URL
     if (url.startsWith('/')) {
       const apiBaseUrl = import.meta.env.VITE_API_URL || import.meta.env.REACT_APP_API_URL || '';
       if (apiBaseUrl) {
