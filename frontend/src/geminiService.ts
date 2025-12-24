@@ -72,7 +72,8 @@ export async function generateSpecialEdImage(
       
       // 如果是相对路径，转换为完整的后端URL
       if (imageUrl.startsWith('/')) {
-        const apiBaseUrl = import.meta.env.VITE_API_URL || import.meta.env.REACT_APP_API_URL || '';
+        const env = import.meta.env as any;
+        const apiBaseUrl = env?.VITE_API_URL || env?.REACT_APP_API_URL || '';
         if (apiBaseUrl) {
           // 移除末尾的斜杠（如果有）
           const baseUrl = apiBaseUrl.replace(/\/$/, '');

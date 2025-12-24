@@ -111,8 +111,8 @@ const App: React.FC = () => {
         icon: plannedScenario.icon || '✨',
         steps: plannedScenario.steps.map((step, idx) => ({
           step_order: idx + 1,
-          instruction: step.text || step.instruction,
-          image_prompt: step.img_prompt_suffix || step.image_prompt,
+          instruction: step.text,
+          image_prompt: step.img_prompt_suffix,
           image_url: step.imageUrl || null // 保存图片URL
         }))
       };
@@ -166,7 +166,8 @@ const App: React.FC = () => {
     if (!url) return undefined;
     if (url.startsWith('http')) return url; // 已经是完整URL
     if (url.startsWith('/')) {
-      const apiBaseUrl = import.meta.env.VITE_API_URL || import.meta.env.REACT_APP_API_URL || '';
+      const env = import.meta.env as any;
+      const apiBaseUrl = env?.VITE_API_URL || env?.REACT_APP_API_URL || '';
       if (apiBaseUrl) {
         const baseUrl = apiBaseUrl.replace(/\/$/, '');
         return `${baseUrl}${url}`;
