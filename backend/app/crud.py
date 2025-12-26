@@ -72,5 +72,5 @@ def update_scenario_steps(db: Session, scenario_id: int, steps: List[schemas.Tra
     
     db.commit()
     db.refresh(db.query(models.Scenario).filter(models.Scenario.id == scenario_id).first())
-    return db.query(models.TrainingStep).filter(models.TrainingStep.scenario_id == scenario_id).all()
+    return db.query(models.TrainingStep).filter(models.TrainingStep.scenario_id == scenario_id).order_by(models.TrainingStep.step_order).all()
 

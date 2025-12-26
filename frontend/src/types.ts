@@ -9,6 +9,7 @@ export interface TrainingStep {
   completed?: boolean;
   imageUrl?: string;
   assistanceLevel?: AssistanceLevel;
+  step_order?: number; // 步骤顺序
 }
 
 export interface Scenario {

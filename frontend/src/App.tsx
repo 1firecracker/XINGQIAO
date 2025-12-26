@@ -188,7 +188,8 @@ const App: React.FC = () => {
         id: step.id,
         text: step.instruction,
         img_prompt_suffix: step.image_prompt || '',
-        imageUrl: normalizeImageUrl(step.image_url)
+        imageUrl: normalizeImageUrl(step.image_url),
+        step_order: step.step_order
       }))
     })),
     ...customScenarios

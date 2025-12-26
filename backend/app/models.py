@@ -12,8 +12,8 @@ class Scenario(Base):
     is_custom = Column(Boolean, default=False)
     creator_id = Column(Integer, nullable=True)
 
-    # 关联
-    steps = relationship("TrainingStep", back_populates="scenario", cascade="all, delete-orphan")
+    # 关联（按step_order排序）
+    steps = relationship("TrainingStep", back_populates="scenario", cascade="all, delete-orphan", order_by="TrainingStep.step_order")
 
     created_at = Column(DateTime, default=func.now())
 
