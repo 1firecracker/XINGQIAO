@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Scenario, UserPreferences, TrainingStep, AssistanceLevel } from '../types';
-import { planScenarioSteps, generateSpecialEdImage, generateTTSAudio, decodeAudioBuffer } from '../geminiService';
+import { planScenarioSteps, generateSpecialEdImage, generateTTSAudio, decodeAudioBuffer, getPresetImage } from '../geminiService';
 import { MUSIC_OPTIONS, SFX } from '../constants';
 import RegenerateImageDialog from './RegenerateImageDialog';
 import AssistanceLevelDialog from './AssistanceLevelDialog';
@@ -182,9 +182,35 @@ const TrainingSession: React.FC<TrainingSessionProps> = ({
       }
 
       // 检查步骤是否已有imageUrl
-      const stepsWithImages = plannedSteps.map(step => ({
-        ...step,
-        imageUrl: step.imageUrl || null
+      // 如果是"过马路"场景且没有imageUrl，尝试使用预设图片
+      const stepsWithImages = await Promise.all(plannedSteps.map(async (step, idx) => {
+        let imageUrl = step.imageUrl || null;
+        
+        // 如果是"过马路"场景且没有imageUrl，使用预设图片
+        if (!imageUrl && scenario.name === "过马路") {
+          const stepOrder = idx + 1;
+          try {
+            const presetUrl = await getPresetImage(scenario.name, stepOrder, preferences);
+            if (presetUrl) {
+              imageUrl = presetUrl;
+              // 如果有scenarioId和stepId，保存到数据库
+              if (step.id && scenarioId) {
+                try {
+                  await scenariosApi.updateStepImage(scenarioId, step.id, presetUrl);
+                } catch (error) {
+                  console.error('Failed to save preset image URL to database:', error);
+                }
+              }
+            }
+          } catch (error) {
+            console.error('Failed to get preset image:', error);
+          }
+        }
+        
+        return {
+          ...step,
+          imageUrl: imageUrl
+        };
       }));
 
       // 检查是否有缺失的图片
@@ -223,11 +249,16 @@ const TrainingSession: React.FC<TrainingSessionProps> = ({
         // 只生成缺失的图片
         const genPromises = missingImages.map(async (step, idx) => {
           const stepId = step.id;
+          // 找到step在原始数组中的位置（用于stepOrder）
+          const stepIndex = stepsWithImages.findIndex(s => s.id === step.id);
+          const stepOrder = stepIndex >= 0 ? stepIndex + 1 : idx + 1;
           const url = await generateSpecialEdImage(
             step.img_prompt_suffix, 
             preferences,
             stepId,
-            scenarioId
+            scenarioId,
+            scenario.name,
+            stepOrder
           );
           setGenerationProgress(prev => prev + (100 / totalImagesCount));
           
@@ -293,11 +324,14 @@ const TrainingSession: React.FC<TrainingSessionProps> = ({
         fetch('http://127.0.0.1:7243/ingest/77189bd5-cf28-46a6-93a6-2efc554a2100',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TrainingSession.tsx:startSessionFlow',message:'Starting image generation',data:{stepId:step.id,stepIndex:idx,totalSteps:plannedSteps.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
         // #endregion
         const stepId = step.id;
+        const stepOrder = idx + 1; // 步骤顺序从1开始
         const url = await generateSpecialEdImage(
           step.img_prompt_suffix, 
           preferences,
           stepId,
-          scenarioId
+          scenarioId,
+          scenario.name,
+          stepOrder
         );
         // #region agent log
         fetch('http://127.0.0.1:7243/ingest/77189bd5-cf28-46a6-93a6-2efc554a2100',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TrainingSession.tsx:startSessionFlow',message:'Image generation completed',data:{stepId,stepIndex:idx,hasUrl:!!url},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});

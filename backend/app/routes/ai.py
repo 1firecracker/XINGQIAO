@@ -4,8 +4,15 @@ from app.ai_service import ai_service
 from app.schemas import ScenarioPlanRequest, ImageGenerateRequest, TTSGenerateRequest, APIResponse
 from app.database import get_db
 from app import models
+from pydantic import BaseModel
+from typing import Optional
 
 router = APIRouter()
+
+class PresetImageRequest(BaseModel):
+    scenario_name: str
+    step_order: int
+    interest: Optional[str] = None
 
 @router.post("/plan-scenario", response_model=APIResponse)
 async def plan_scenario(request: ScenarioPlanRequest):
@@ -34,6 +41,30 @@ async def plan_scenario(request: ScenarioPlanRequest):
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"场景规划失败: {str(e)}")
+
+@router.post("/get-preset-image", response_model=APIResponse)
+async def get_preset_image(request: PresetImageRequest):
+    """获取预设图片URL（用于特定场景的固定图片）"""
+    # 只处理"过马路"场景
+    if request.scenario_name != "过马路":
+        raise HTTPException(status_code=400, detail="此接口仅支持'过马路'场景")
+    
+    # 根据个性化设置选择图片组
+    # 如果interest是"猫咪"或包含"猫"，使用cat版本
+    use_cat_version = request.interest and ("猫" in request.interest or "cat" in request.interest.lower())
+    
+    # 构建文件名
+    suffix = "cat" if use_cat_version else ""
+    filename = f"crossroad{request.step_order}{suffix}.png"
+    
+    # 返回图片URL（相对路径，前端会转换为完整URL）
+    image_url = f"/demo/{filename}"
+    
+    return APIResponse(
+        success=True,
+        data={"image_url": image_url},
+        message="预设图片URL获取成功"
+    )
 
 @router.post("/generate-image", response_model=APIResponse)
 async def generate_image(request: ImageGenerateRequest, db: Session = Depends(get_db)):

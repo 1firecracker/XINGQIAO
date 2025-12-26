@@ -48,6 +48,12 @@ app.include_router(ai.router, prefix="/api/ai", tags=["ai"])
 # 注意：StaticFiles 会自动应用 CORS 中间件（如果已配置）
 app.mount("/files", StaticFiles(directory=str(file_manager.upload_dir)), name="files")
 
+# 挂载demo静态文件目录（用于预设图片）
+from pathlib import Path
+demo_dir = Path(__file__).parent.parent / "demo"
+if demo_dir.exists():
+    app.mount("/demo", StaticFiles(directory=str(demo_dir)), name="demo")
+
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}

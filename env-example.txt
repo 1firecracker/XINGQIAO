@@ -1,6 +1,6 @@
 # Google Gemini AI API Key
 # 从 https://ai.google.dev 获取
-
+GEMINI_API_KEY=AIzaSyB2UZ67qAtY-yBZyu9AeXv2l24ZvUDCtug
 # 数据库配置 (黑客松版本使用SQLite)
 DATABASE_URL=sqlite:///./app.db
 

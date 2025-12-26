@@ -38,17 +38,17 @@ def create_initial_data():
                     {
                         "step_order": 1,
                         "instruction": "转头观察",
-                        "image_prompt": "child turning head left and right to check for cars at crosswalk"
+                        "image_prompt": "白色背景，一个的小朋友站在斑马线前准备过马路前转头观察(没有通过马路)，头部明显向左转动90度观察，动作流畅自然。背景只有简单的灰色道路轮廓和黑白相间的斑马线。"
                     },
                     {
                         "step_order": 2,
                         "instruction": "耐心等待绿灯",
-                        "image_prompt": "child patiently waiting for green pedestrian light at crosswalk"
+                        "image_prompt": "绘制小朋友站在斑马线前的背身(尚未通过马路)，抬头看着前方交通信号灯等待, 信号灯显示红色圆圈 "
                     },
                     {
                         "step_order": 3,
                         "instruction": "直行通过",
-                        "image_prompt": "child walking straight on crosswalk"
+                        "image_prompt": "小朋友通过斑马线, 背景只有简单的道路轮廓和斑马线，小朋友占据画面中心位置"
                     }
                 ]
             },

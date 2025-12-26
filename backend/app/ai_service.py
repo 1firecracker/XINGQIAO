@@ -48,15 +48,14 @@ class AIService:
 视觉提示词（image_prompt）的格式要求：
 - 必须是简短的英文描述句（尽量控制在10-15个单词以内），但必须包含任务背景/场景上下文
 - 每张图片必须明确显示当前动作是在什么任务/场景中完成的，例如："child turning head left to check traffic while crossing street" 而不是 "child turning head left"
-- 任务背景要简洁明确，用1-3个关键词说明场景（如：crossing street, waiting in line, raising hand in classroom）
+- 任务背景要简洁明确，用一句话说明场景（如：你需要画一个孩子正在马路口等红灯的场景, 孩子在路口没有通过红绿灯)
 - 每张图片只表现一个核心动作，只描述当前步骤的动作，不要描述前后步骤
 - 每张图片中最多只包含一个儿童角色，如果可以用物体或场景表达，可以不画人物
-- 如果出现儿童角色，画面中只能有这一个孩子，不要有其他人物或背景人群
 - 背景必须简洁干净，避免人群、复杂环境和拥挤场景
 - 只描述具体动作和物体，不要使用比喻、抽象修辞或隐喻
 - 不要在image_prompt中指定绘画风格、颜色风格或画风（这些由系统统一控制）
 - 禁止在图片中生成任何文字、字母、数字、标签、对话气泡、符号、图标或Logo
-- 画面风格为极简线条风格（minimalist black line art），使用极简黑色线条勾勒
+- 画面风格为极简线条风格
 - 场景中只保留与当前动作直接相关的物体，不画任何装饰性元素
 - 内容必须温和、安全，适合自闭症儿童，避免暴力、恐怖或刺激性元素
 - 重要：image_prompt格式为"动作 + 任务背景"，例如："child standing at crosswalk edge" 或 "child raising hand in classroom"

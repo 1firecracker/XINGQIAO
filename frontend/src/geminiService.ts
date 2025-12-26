@@ -41,13 +41,60 @@ export async function planScenarioSteps(topic: string, preferences: UserPreferen
 }
 
 /**
+ * 获取预设图片（用于特定场景的固定图片）
+ */
+export async function getPresetImage(
+  scenarioName: string,
+  stepOrder: number,
+  preferences?: UserPreferences
+): Promise<string | null> {
+  try {
+    const interest = preferences?.interest || null;
+    const response = await aiApi.getPresetImage(scenarioName, stepOrder, interest);
+    if (response && response.success && response.data && response.data.image_url) {
+      let imageUrl = response.data.image_url;
+      
+      // 如果是相对路径，在开发环境中可以直接使用（通过Vite代理）
+      // 在生产环境中，需要转换为完整的后端URL
+      if (imageUrl.startsWith('/')) {
+        const env = import.meta.env as any;
+        const isDev = import.meta.env.DEV;
+        
+        if (isDev) {
+          // 开发环境：使用相对路径，通过Vite代理访问
+          // 不需要转换，直接返回相对路径即可
+        } else {
+          // 生产环境：转换为完整的后端URL
+          const apiBaseUrl = env?.VITE_API_URL || env?.REACT_APP_API_URL || '';
+          if (apiBaseUrl) {
+            const baseUrl = apiBaseUrl.replace(/\/$/, '');
+            imageUrl = `${baseUrl}${imageUrl}`;
+          } else {
+            // 如果没有配置，使用当前域名（假设前后端同域）
+            imageUrl = `${window.location.origin}${imageUrl}`;
+          }
+        }
+      }
+      
+      return imageUrl;
+    }
+    return null;
+  } catch (error) {
+    console.error("Get preset image failed:", error);
+    return null;
+  }
+}
+
+/**
  * 核心生图函数 - 通过后端API
  */
 export async function generateSpecialEdImage(
   promptSuffix: string, 
   preferences?: UserPreferences,
   stepId?: number,
-  scenarioId?: number
+  scenarioId?: number,
+  scenarioName?: string,
+  stepOrder?: number
 ): Promise<string> {
   // #region agent log
   fetch('http://127.0.0.1:7243/ingest/77189bd5-cf28-46a6-93a6-2efc554a2100',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'geminiService.ts:generateSpecialEdImage',message:'generateSpecialEdImage called',data:{stepId,scenarioId,promptSuffix:promptSuffix.substring(0,50)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
